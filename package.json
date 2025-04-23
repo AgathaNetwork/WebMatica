@@ -13,8 +13,10 @@
   "dependencies": {
     "express": "^4.17.1",
     "ejs": "^3.1.6",
-    "prismarine-viewer":"1.33.0",
-    "multer": "^1.4.5"
+    "prismarine-viewer": "1.33.0",
+    "multer": "1.4.5-lts.2",
+    "uuid": "^9.0.0",
+    "node-canvas-webgl": "0.3.0"
   },
   "devDependencies": {},
   "engines": {
