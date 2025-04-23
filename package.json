@@ -16,7 +16,9 @@
     "prismarine-viewer": "1.33.0",
     "multer": "1.4.5-lts.2",
     "uuid": "^9.0.0",
-    "node-canvas-webgl": "0.3.0"
+    "node-canvas-webgl": "0.3.0",
+    "prismarine-schematic":"1.2.3",
+    "mcnbt":"2.0.3"
   },
   "devDependencies": {},
   "engines": {
