@@ -12,7 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "ejs": "^3.1.6"
+    "ejs": "^3.1.6",
+    "prismarine-viewer":"1.33.0",
+    "multer": "^1.4.5"
   },
   "devDependencies": {},
   "engines": {
