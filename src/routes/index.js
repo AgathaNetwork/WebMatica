@@ -23,7 +23,7 @@ router.post('/proceed', upload.single('file'), (req, res) => {
 });
 
 // 其他路由
-router.get('/', (req, res) => {
+router.get('/', (req, res) => { 
     res.render('index', { title: 'Welcome to WebMatica' });
 });
 
