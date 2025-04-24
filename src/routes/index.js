@@ -115,7 +115,7 @@ const proceed_litematic = async (filePath, fileUUID) => {
                 const byte = bytesData.slice(i, i + BitsPerBlock);
                 byteArray.push(parseInt(byte, 2));
             }
-
+            
             console.log(`Processed byteArray for ${key}, length: ${byteArray.length}`);
             
             // 构造 JSON 数据
@@ -141,6 +141,8 @@ const proceed_litematic = async (filePath, fileUUID) => {
             const width = 512
             const height = 512
             const version = '1.21.4'
+            const registry = require('prismarine-registry')(version)
+            const BlockReg = require('prismarine-block')(registry)
             const World = require('prismarine-world')(version)
             const Chunk = require('prismarine-chunk')(version)
             const center = new Vec3(30, 90, 30)
@@ -153,9 +155,9 @@ const proceed_litematic = async (filePath, fileUUID) => {
             for(let xCnt = 0; xCnt < x; xCnt++){
                 for(let yCnt = 0; yCnt < y; yCnt++){
                     for(let zCnt = 0; zCnt < z; zCnt++){
-                        const paletteIndex = byteArray[pointer];
+                        //const paletteIndex = byteArray[pointer];
                         const block = new Vec3(xCnt, yCnt, zCnt);
-                        world.setBlock(block, thisRegionPalette[paletteIndex]);
+                        world.setBlock(block, BlockReg.fromProperties("stone", {}));
                         pointer++;
                     }
                 }
@@ -201,21 +203,15 @@ const proceed_litematic = async (filePath, fileUUID) => {
 
             // 手动遍历 viewer.scene.children
             if (viewer.scene && viewer.scene.children) {
-                console.log('viewer.scene.children:', viewer.scene.children);
-                viewer.scene.children.forEach((node) => {
-                    console.log(`Node type: ${node.type}`);
-                    // 检查节点类型并移除不支持的节点
-                    if (node instanceof THREE.AmbientLight) {
-                        console.log(`Removing unsupported node: ${node.type}`);
-                        viewer.scene.remove(node); // 移除 AmbientLight
-                    } else if (node instanceof THREE.DirectionalLight) {
-                        console.log(`Removing unsupported node: ${node.type}`);
-                        if (node.target) {
-                            console.log(`Removing target of DirectionalLight: ${node.target.type}`);
+                // 过滤掉 AmbientLight 和 DirectionalLight 节点
+                viewer.scene.children = viewer.scene.children.filter((node) => {
+                    if (node.type === 'AmbientLight' || node.type === 'DirectionalLight') {
+                        if (node.type === 'DirectionalLight' && node.target) {
                             viewer.scene.remove(node.target); // 移除 DirectionalLight 的 target
                         }
-                        viewer.scene.remove(node); // 移除 DirectionalLight
+                        return false; // 从 children 中移除
                     }
+                    return true; // 保留其他节点
                 });
             }
             const GLTFExporter = require('three-gltf-exporter'); // Import GLTFExporter
@@ -226,9 +222,7 @@ const proceed_litematic = async (filePath, fileUUID) => {
                 await new Promise((resolve) =>
                     gltfExporter.parse(viewer.scene, (result) => resolve(JSON.stringify(result)), {
                         embedImages: true,
-                        onlyVisible: true,
-                        truncateDrawRange: true,
-                        binary: false,
+                        binary: false
                     })
                 )
             );
