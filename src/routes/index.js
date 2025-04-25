@@ -14,6 +14,7 @@ const { Viewer, WorldView } = require('prismarine-viewer').viewer
 const nbt = require('prismarine-nbt');
 const zlib = require('zlib'); // 用于解压缩 .litematic 文件
 const { default: v } = require('vec3')
+const { Block } = require('prismarine-block')
 
 const proceed = async (filePath, fileUUID) => {
     const viewDistance = 8
@@ -81,9 +82,6 @@ const proceed = async (filePath, fileUUID) => {
 
     console.log('saved')
 }
-
-
-
 const proceed_litematic = async (filePath, fileUUID) => {
     try {
         // 读取 .litematic 文件
@@ -152,22 +150,22 @@ const proceed_litematic = async (filePath, fileUUID) => {
             
             const world = new World(() => new Chunk())
             let pointer = 0;
-            for(let xCnt = 0; xCnt < x; xCnt++){
-                for(let yCnt = 0; yCnt < y; yCnt++){
-                    for(let zCnt = 0; zCnt < z; zCnt++){
-                        //const paletteIndex = byteArray[pointer];
-                        const block = new Vec3(xCnt, yCnt, zCnt);
-                        world.setBlock(block, BlockReg.fromProperties("stone", {}));
-                        pointer++;
-                    }
-                }
-            }
-            
+            const TotX = x;
+            const TotY = y;
+            const TotZ = z;
+            await world.initialize( async (x, y, z) => {
+                pointer = y * TotX * TotZ + z * TotX + x;
+                //var block = BlockReg.fromProperties(thisRegionPalette.value[byteArray[pointer]].Name.value.slice(10), {})
+                var block = BlockReg.fromProperties('stone', {})
+                block.skyLight = 15
+                console.log(`Block: ${block.name}, X: ${x}, Y: ${y}, Z: ${z}`);
+                return block
+            }, z, x, y, new Vec3(0, 0, 0))
+
             if (!viewer.setVersion(version)) {
                 throw new Error(`Failed to set viewer version to ${version}`);
             }
         
-            // Load world
             const worldView = new WorldView(world, viewDistance, center)
             viewer.listen(worldView)
         
@@ -177,12 +175,11 @@ const proceed_litematic = async (filePath, fileUUID) => {
         
             viewer.camera.lookAt(point)
         
-            worldView.init(center)
-            new Promise(resolve => setTimeout(resolve, 3000))
-            renderer.render(viewer.scene, viewer.camera)
+            await worldView.init(center)
+            await new Promise(resolve => setTimeout(resolve, 3000))
+            await renderer.render(viewer.scene, viewer.camera)
             const { Blob, FileReader } = require('vblob')
         
-            // Patch global scope to imitate browser environment.
             global.window = global
             global.Blob = Blob
             global.FileReader = FileReader
@@ -214,6 +211,7 @@ const proceed_litematic = async (filePath, fileUUID) => {
                     return true; // 保留其他节点
                 });
             }
+            console.log(JSON.stringify(viewer.scene.children));
             const GLTFExporter = require('three-gltf-exporter'); // Import GLTFExporter
             // 导出 GLTF 文件
             const gltfExporter = new GLTFExporter();
