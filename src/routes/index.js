@@ -244,24 +244,18 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage });
-
 // 文件上传处理路由
 router.post('/proceed', upload.single('file'), (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded or invalid file type.');
     }
-
+    // 清理 THREE 的全局状态
+    global.THREE.Cache && global.THREE.Cache.clear();
     // 返回文件的完整路径
     const filePath = path.join(__dirname, '../../uploads/file', req.file.filename);
     const fileUUID = req.file.uuid; // 获取 UUID
-    res.send(`File uploaded successfully: ${filePath}`);
-    if(filePath.endsWith('.litematic')){
-        proceed_litematic(filePath, fileUUID).then(() => {
-            console.log('File processed successfully');
-        }).catch(err => {
-            console.error('Error processing file:', err);
-        });
-    }
+    res.send({status: 'success', uuid: fileUUID});
+    proceed_litematic(filePath, fileUUID);
 });
 
 // 其他路由
