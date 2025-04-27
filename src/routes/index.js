@@ -1,167 +1,156 @@
 global.THREE = require('three')
 global.Worker = require('worker_threads').Worker
 const { createCanvas, ImageData } = require('node-canvas-webgl/lib')
-const { Schematic } = require('prismarine-schematic')
 const fs = require('fs').promises
 const Vec3 = require('vec3').Vec3
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const NBT = require('mcnbt');
 const { v4: uuidv4 } = require('uuid'); // 引入 UUID 生成器
 const router = express.Router();
 const { Viewer, WorldView } = require('prismarine-viewer').viewer
-const nbt = require('prismarine-nbt');
-const zlib = require('zlib'); // 用于解压缩 .litematic 文件
-const { default: v } = require('vec3')
-const { Block } = require('prismarine-block')
 
-const proceed = async (filePath, fileUUID) => {
-    const viewDistance = 8
-    const width = 512
-    const height = 512
-    const version = '1.21.4'
-    const World = require('prismarine-world')(version)
-    const Chunk = require('prismarine-chunk')(version)
-    const center = new Vec3(30, 90, 30)
-    const canvas = createCanvas(width, height)
-    const renderer = new THREE.WebGLRenderer({ canvas })
-    const viewer = new Viewer(renderer, false)
-    const data = await fs.readFile(filePath)
-    const schem = await Schematic.read(data, version)
-    const world = new World(() => new Chunk())
 
-    await schem.paste(world, new Vec3(0, 60, 0))
-    
-    if (!viewer.setVersion(version)) {
-        throw new Error(`Failed to set viewer version to ${version}`);
+
+async function __stripNBTTyping(nbtData, deepslate) {
+  if (nbtData.hasOwnProperty("type")) {
+    switch(deepslate.NbtType[nbtData.type]) {
+      case "Compound":
+        var newDict = {}
+        for (const [k, v] of Object.entries(nbtData.value)) {
+          newDict[k] = await __stripNBTTyping(v, deepslate);
+        }
+        return newDict;
+        break;
+      case "List":
+        var newList = [];
+        for (const [k, v] of Object.entries(nbtData.value.items)) {
+          newList[k] = await __stripNBTTyping(v, deepslate);
+        }
+        return newList;
+        break;
+      default:
+        return nbtData.value;
+    } 
+  } else {
+    switch(nbtData.constructor) {
+      case Object:
+        var newDict = {}
+        for (const [k, v] of Object.entries(nbtData)) {
+          newDict[k] = await __stripNBTTyping(v, deepslate);
+        }
+        return newDict;
+        break;
+      default:
+        return nbtData;
     }
+  }
+}
 
-    // Load world
-    const worldView = new WorldView(world, viewDistance, center)
-    viewer.listen(worldView)
 
-    viewer.camera.position.set(center.x, center.y, center.z)
 
-    const point = new THREE.Vector3(0, 60, 0)
+async function processBlocks(blockData, width, height, depth, y_shift, z_shift, mask, nbits) {
+    
+    var blocks = new Array();
+    for (let x = 0; x < Math.abs(width); x++) {
+        blocks[x] = new Array();
+        for (let y = 0; y < Math.abs(height); y++) {
+            blocks[x][y] = new Array();
+            for (let z = 0; z < Math.abs(depth); z++) {
+                blocks[x][y][z] = await processSingleBlock(blockData, x, y, z, y_shift, z_shift, mask, nbits);
+            }
+        }
+    }
+    return blocks;
+}
 
-    viewer.camera.lookAt(point)
+async function processSingleBlock(blockData, x, y, z, y_shift, z_shift, mask, nbits) {
+    const index = y * y_shift + z * z_shift + x;
+    const start_offset = index * nbits;
+    const start_arr_index = start_offset >>> 5;
+    const end_arr_index = ((index + 1) * nbits - 1) >>> 5;
+    const start_bit_offset = start_offset & 0x1F;
+    const half_ind = start_arr_index >>> 1;
 
-    await worldView.init(center)
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    renderer.render(viewer.scene, viewer.camera)
-    const { Blob, FileReader } = require('vblob')
-
-    // Patch global scope to imitate browser environment.
-    global.window = global
-    global.Blob = Blob
-    global.FileReader = FileReader
-    global.THREE = THREE
-    global.ImageData = ImageData
-    global.document = {
-        createElement: (nodeName) => {
-            if (nodeName !== 'canvas') throw new Error(`Cannot create node ${nodeName}`)
-            const canvas = createCanvas(256, 256)
-            return canvas
+    let blockStart, blockEnd;
+    if ((start_arr_index & 0x1) === 0) {
+        blockStart = blockData[half_ind][1];
+        blockEnd = blockData[half_ind][0];
+    } else {
+        blockStart = blockData[half_ind][0];
+        if (half_ind + 1 < blockData.length) {
+            blockEnd = blockData[half_ind + 1][1];
+        } else {
+            blockEnd = 0x0; // 防止越界
         }
     }
 
-    const GLTFExporter = require('three-gltf-exporter'); // Import GLTFExporter
-
-    // Use GLTFExporter directly
-    const gltfExporter = new GLTFExporter();
-    await fs.writeFile(
-        'uploads/gltf/' + fileUUID + '.gltf',
-        await new Promise((resolve) =>
-            gltfExporter.parse(viewer.scene, (result) => resolve(JSON.stringify(result)), {
-                embedImages: true,
-                binary: false,
-            })
-        )
-    );
-
-    console.log('saved')
+    if (start_arr_index === end_arr_index) {
+        //console.log((blockStart >>> start_bit_offset) & mask)
+        return (blockStart >>> start_bit_offset) & mask;
+    } else {
+        const end_offset = 32 - start_bit_offset;
+        //console.log(((blockStart >>> start_bit_offset) & mask) | ((blockEnd << end_offset) & mask))
+        return ((blockStart >>> start_bit_offset) & mask) | ((blockEnd << end_offset) & mask);
+    }
 }
+
+
 const proceed_litematic = async (filePath, fileUUID) => {
+    const deepslate = await import('deepslate');
+    
     try {
         // 读取 .litematic 文件
         const data = await fs.readFile(filePath);
+        const nbtdata = deepslate.NbtFile.read(new Uint8Array(data), {compression: 'gzip'}).toJson();
+        const regions = nbtdata.root.Regions.value;
 
-        // 解压缩 GZIP 数据（.litematic 文件通常是 GZIP 压缩的）
-        const decompressedData = zlib.gunzipSync(data);
-
-        // 解析 NBT 数据
-        const parsed = await nbt.parse(decompressedData);
-        // 获取 Metadata.EnclosingSize
-        const metadata = parsed.parsed.value.Metadata.value.EnclosingSize.value;
-        const BlockState = parsed.parsed.value.Regions.value;
-        const BlockStateKeys = Object.keys(BlockState);
-
-        for (const key of BlockStateKeys) { // 使用 for...of 循环
-            console.log(`Region Name: ${key}`);
-            const thisRegion = BlockState[key];
-            const thisRegionData = thisRegion.value.BlockStates.value;
-            const thisRegionPalette = thisRegion.value.BlockStatePalette.value;
-            const x = Math.abs(thisRegion.value.Size.value.x.value);
-            const y = Math.abs(thisRegion.value.Size.value.y.value);
-            const z = Math.abs(thisRegion.value.Size.value.z.value);
-
-            const bytesData = thisRegionData.flat().map(num => num.toString(2).padStart(32, '0')).join('');
-            const byteArray = [];
-            const BitsPerBlock = 8;
-            for (let i = 0; i < bytesData.length; i += BitsPerBlock) {
-                const byte = bytesData.slice(i, i + BitsPerBlock);
-                byteArray.push(parseInt(byte, 2));
-            }
-            
-            console.log(`Processed byteArray for ${key}, length: ${byteArray.length}`);
-            
-            // 构造 JSON 数据
-            const jsonData = {
-                fileUUID: fileUUID,
-                region: key,
-                status: 'success',
-                timestamp: new Date().toISOString(),
-                regionSize:{
-                    x: x,
-                    y: y,
-                    z: z
-                },
-                blockSize: byteArray.length,
-            };
-
-            // 写入 JSON 文件
-            const outputFilePath = `uploads/info/${fileUUID}-${key}.json`;
-            await fs.mkdir('uploads/info', { recursive: true }); // 确保目录存在
-            await fs.writeFile(outputFilePath, JSON.stringify(jsonData, null, 2));
+        for (let regionName in regions) { // 使用 for...of 循环
+            console.log(`Region Name: ${regionName}`);
+            var region = regions[regionName].value;
+            const Sx = Math.abs(region.Size.value.x.value);
+            const Sy = Math.abs(region.Size.value.y.value);
+            const Sz = Math.abs(region.Size.value.z.value);
 
             const viewDistance = 8
-            const width = 512
-            const height = 512
             const version = '1.21.4'
             const registry = require('prismarine-registry')(version)
             const BlockReg = require('prismarine-block')(registry)
             const World = require('prismarine-world')(version)
             const Chunk = require('prismarine-chunk')(version)
             const center = new Vec3(30, 90, 30)
-            const canvas = createCanvas(width, height)
+            const canvas = createCanvas(512, 512)
             const renderer = new THREE.WebGLRenderer({ canvas })
             const viewer = new Viewer(renderer, false)
-            
-            const world = new World(() => new Chunk())
-            let pointer = 0;
-            const TotX = x;
-            const TotY = y;
-            const TotZ = z;
-            await world.initialize( async (x, y, z) => {
-                pointer = y * TotX * TotZ + z * TotX + x;
-                //var block = BlockReg.fromProperties(thisRegionPalette.value[byteArray[pointer]].Name.value.slice(10), {})
-                var block = BlockReg.fromProperties('stone', {})
-                block.skyLight = 15
-                console.log(`Block: ${block.name}, X: ${x}, Y: ${y}, Z: ${z}`);
-                return block
-            }, z, x, y, new Vec3(0, 0, 0))
 
+            const world = await new World(() => new Chunk())
+
+            var blockPalette = await __stripNBTTyping(region.BlockStatePalette, deepslate);
+            
+            console.log(JSON.stringify(blockPalette))
+            var nbits = Math.ceil(Math.log2(blockPalette.length));
+            var width = region.Size.value.x.value;
+            var height = region.Size.value.y.value;
+            var depth = region.Size.value.z.value;
+
+            var blockData = region.BlockStates.value;
+            
+            var mask = (1 << nbits) - 1;
+            var y_shift = Math.abs(width * depth);
+            var z_shift = Math.abs(width);
+            var blocks = await processBlocks(blockData, width, height, depth, y_shift, z_shift, mask, nbits);
+            await world.initialize((x, y, z) => {
+                const blockId = blocks[x][y][z]
+                const blockName = blockPalette[blockId].Name
+                var blockProperties = blockPalette[blockId].Properties
+                if(blockProperties == null) {
+                    blockProperties = {}
+                }
+                return BlockReg.fromProperties(blockName.replace("minecraft:",""), blockProperties)
+
+                
+            }, Sz, Sx, Sy, new Vec3(0, 0, 0))
+            
             if (!viewer.setVersion(version)) {
                 throw new Error(`Failed to set viewer version to ${version}`);
             }
@@ -197,7 +186,6 @@ const proceed_litematic = async (filePath, fileUUID) => {
             if (!(viewer.scene instanceof THREE.Scene)) {
                 throw new Error('viewer.scene is not a valid THREE.Scene object');
             }
-
             // 手动遍历 viewer.scene.children
             if (viewer.scene && viewer.scene.children) {
                 // 过滤掉 AmbientLight 和 DirectionalLight 节点
@@ -215,8 +203,10 @@ const proceed_litematic = async (filePath, fileUUID) => {
             const GLTFExporter = require('three-gltf-exporter'); // Import GLTFExporter
             // 导出 GLTF 文件
             const gltfExporter = new GLTFExporter();
+            // 检查GLTF文件夹是否存在
+            await fs.mkdir(path.join(__dirname, '../../uploads/gltf'), { recursive: true });
             await fs.writeFile(
-                `uploads/gltf/${fileUUID}-${key}.gltf`,
+                `uploads/gltf/${fileUUID}-${regionName}.gltf`,
                 await new Promise((resolve) =>
                     gltfExporter.parse(viewer.scene, (result) => resolve(JSON.stringify(result)), {
                         embedImages: true,
@@ -224,24 +214,27 @@ const proceed_litematic = async (filePath, fileUUID) => {
                     })
                 )
             );
-            console.log(`${key} GLTF saved successfully.`);
+            console.log(`${regionName} GLTF saved successfully.`);
         }
     } catch (err) {
         console.error(`Error processing .litematic file: ${err.message}`);
         throw err;
     }
-};
 
+
+};
 // 配置 multer 存储
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
+        // 检查 uploads 文件夹是否存在
+        fs.mkdir(path.join(__dirname, '../../uploads/file'), { recursive: true })
         cb(null, path.join(__dirname, '../../uploads/file')); // 保存到 uploads 文件夹
     },
     filename: (req, file, cb) => {
         // 检查文件后缀是否为 .litematica 或 .schem
         const ext = path.extname(file.originalname);
-        if (ext !== '.litematic' && ext !== '.schem') {
-            return cb(new Error('Only .litematica and .schem files are allowed'));
+        if (ext !== '.litematic') {
+            return cb(new Error('Only .litematic files are allowed'));
         }
         // 生成 UUID 作为文件名
         const uuid = uuidv4();
@@ -264,13 +257,6 @@ router.post('/proceed', upload.single('file'), (req, res) => {
     res.send(`File uploaded successfully: ${filePath}`);
     if(filePath.endsWith('.litematic')){
         proceed_litematic(filePath, fileUUID).then(() => {
-            console.log('File processed successfully');
-        }).catch(err => {
-            console.error('Error processing file:', err);
-        });
-    }
-    else if(filePath.endsWith('.schem')){
-        proceed(filePath, fileUUID).then(() => {
             console.log('File processed successfully');
         }).catch(err => {
             console.error('Error processing file:', err);
