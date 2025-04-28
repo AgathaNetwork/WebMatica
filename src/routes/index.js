@@ -1,6 +1,12 @@
-global.THREE = require('three')
-global.Worker = require('worker_threads').Worker
+const viewDistance = 8
+const version = '1.21.4'
+const THREE = require('three')
 const { createCanvas, ImageData } = require('node-canvas-webgl/lib')
+
+global.ImageData = ImageData;
+const { Blob, FileReader } = require('vblob')
+global.Blob = Blob;
+global.FileReader = FileReader;
 const fs = require('fs').promises
 const Vec3 = require('vec3').Vec3
 const express = require('express');
@@ -9,8 +15,20 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid'); // 引入 UUID 生成器
 const router = express.Router();
 const { Viewer, WorldView } = require('prismarine-viewer').viewer
-
-
+const registry = require('prismarine-registry')(version)
+const BlockReg = require('prismarine-block')(registry)
+const World = require('prismarine-world')(version)
+const Chunk = require('prismarine-chunk')(version)
+const { Worker } = require('worker_threads');
+const center = new Vec3(30, 90, 30)
+// 覆盖全局 Worker
+global.Worker = class extends Worker {
+    constructor(filePath, options) {
+        // 如果路径不是绝对路径，则将其解析为相对于当前文件的路径
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(__dirname, filePath);
+        super(resolvedPath, options);
+    }
+};
 
 async function __stripNBTTyping(nbtData, deepslate) {
   if (nbtData.hasOwnProperty("type")) {
@@ -104,35 +122,32 @@ const proceed_litematic = async (filePath, fileUUID) => {
         const data = await fs.readFile(filePath);
         const nbtdata = deepslate.NbtFile.read(new Uint8Array(data), {compression: 'gzip'}).toJson();
         const regions = nbtdata.root.Regions.value;
-
-        for (let regionName in regions) { // 使用 for...of 循环
+        var viewer = null
+        var worldView = null
+        //for (let regionName in regions) { // 使用 for...of 循环
+        for(const [regionName, _] of Object.entries(regions)) {
             console.log(`Region Name: ${regionName}`);
             var region = regions[regionName].value;
             const Sx = Math.abs(region.Size.value.x.value);
             const Sy = Math.abs(region.Size.value.y.value);
             const Sz = Math.abs(region.Size.value.z.value);
 
-            const viewDistance = 8
-            const version = '1.21.4'
-            const registry = require('prismarine-registry')(version)
-            const BlockReg = require('prismarine-block')(registry)
-            const World = require('prismarine-world')(version)
-            const Chunk = require('prismarine-chunk')(version)
-            const center = new Vec3(30, 90, 30)
+            
             const canvas = createCanvas(512, 512)
             const renderer = new THREE.WebGLRenderer({ canvas })
-            const viewer = new Viewer(renderer, false)
-
+            if (viewer && viewer.scene) {
+                viewer.scene.children = []; // 清空场景中的子节点
+            }
+            viewer = await new Viewer(renderer, false)
+            
             const world = await new World(() => new Chunk())
 
             var blockPalette = await __stripNBTTyping(region.BlockStatePalette, deepslate);
-            
-            console.log(JSON.stringify(blockPalette))
             var nbits = Math.ceil(Math.log2(blockPalette.length));
             var width = region.Size.value.x.value;
             var height = region.Size.value.y.value;
             var depth = region.Size.value.z.value;
-
+            
             var blockData = region.BlockStates.value;
             
             var mask = (1 << nbits) - 1;
@@ -154,26 +169,25 @@ const proceed_litematic = async (filePath, fileUUID) => {
             if (!viewer.setVersion(version)) {
                 throw new Error(`Failed to set viewer version to ${version}`);
             }
-        
-            const worldView = new WorldView(world, viewDistance, center)
+            worldView = await new WorldView(world, viewDistance, center)
             viewer.listen(worldView)
         
+            
             viewer.camera.position.set(center.x, center.y, center.z)
         
             const point = new THREE.Vector3(0, 60, 0)
-        
+            
             viewer.camera.lookAt(point)
-        
-            await worldView.init(center)
+            try {
+                await worldView.init(center);
+            } catch (err) {
+                console.error(`Error during worldView initialization: ${err.message}`);
+                throw err;
+            }
+            console.log("alive")
             await new Promise(resolve => setTimeout(resolve, 3000))
             await renderer.render(viewer.scene, viewer.camera)
-            const { Blob, FileReader } = require('vblob')
-        
             global.window = global
-            global.Blob = Blob
-            global.FileReader = FileReader
-            global.THREE = THREE
-            global.ImageData = ImageData
             global.document = {
                 createElement: (nodeName) => {
                     if (nodeName !== 'canvas') throw new Error(`Cannot create node ${nodeName}`)
@@ -181,7 +195,7 @@ const proceed_litematic = async (filePath, fileUUID) => {
                     return canvas
                 }
             }
-
+            
             // 检查 viewer.scene 是否为有效的 THREE.Scene 对象
             if (!(viewer.scene instanceof THREE.Scene)) {
                 throw new Error('viewer.scene is not a valid THREE.Scene object');
@@ -199,7 +213,6 @@ const proceed_litematic = async (filePath, fileUUID) => {
                     return true; // 保留其他节点
                 });
             }
-            console.log(JSON.stringify(viewer.scene.children));
             const GLTFExporter = require('three-gltf-exporter'); // Import GLTFExporter
             // 导出 GLTF 文件
             const gltfExporter = new GLTFExporter();
@@ -245,17 +258,15 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 // 文件上传处理路由
-router.post('/proceed', upload.single('file'), (req, res) => {
+router.post('/proceed', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded or invalid file type.');
     }
-    // 清理 THREE 的全局状态
-    global.THREE.Cache && global.THREE.Cache.clear();
     // 返回文件的完整路径
     const filePath = path.join(__dirname, '../../uploads/file', req.file.filename);
     const fileUUID = req.file.uuid; // 获取 UUID
     res.send({status: 'success', uuid: fileUUID});
-    proceed_litematic(filePath, fileUUID);
+    await proceed_litematic(filePath, fileUUID);
 });
 
 // 其他路由
