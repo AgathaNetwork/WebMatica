@@ -3,9 +3,10 @@ const version = '1.21.4'
 const THREE = require('three')
 const { createCanvas, ImageData } = require('node-canvas-webgl/lib')
 
-
+global.ImageData = ImageData;
 const { Blob, FileReader } = require('vblob')
-
+global.Blob = Blob;
+global.FileReader = FileReader;
 const fs = require('fs').promises
 const Vec3 = require('vec3').Vec3
 const express = require('express');
@@ -20,7 +21,14 @@ const World = require('prismarine-world')(version)
 const Chunk = require('prismarine-chunk')(version)
 const { Worker } = require('worker_threads');
 const center = new Vec3(30, 90, 30)
-
+// 覆盖全局 Worker
+global.Worker = class extends Worker {
+    constructor(filePath, options) {
+        // 如果路径不是绝对路径，则将其解析为相对于当前文件的路径
+        const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(__dirname, filePath);
+        super(resolvedPath, options);
+    }
+};
 
 async function __stripNBTTyping(nbtData, deepslate) {
   if (nbtData.hasOwnProperty("type")) {
@@ -118,20 +126,6 @@ const proceed_litematic = async (filePath, fileUUID) => {
         var worldView = null
         //for (let regionName in regions) { // 使用 for...of 循环
         for(const [regionName, _] of Object.entries(regions)) {
-
-            global.ImageData = ImageData;
-            global.Blob = Blob;
-            global.FileReader = FileReader;
-            // 覆盖全局 Worker
-            global.Worker = class extends Worker {
-                constructor(filePath, options) {
-                    // 如果路径不是绝对路径，则将其解析为相对于当前文件的路径
-                    const resolvedPath = path.isAbsolute(filePath) ? filePath : path.resolve(__dirname, filePath);
-                    super(resolvedPath, options);
-                }
-            };
-
-
             console.log(`Region Name: ${regionName}`);
             var region = regions[regionName].value;
             const Sx = Math.abs(region.Size.value.x.value);
@@ -192,7 +186,7 @@ const proceed_litematic = async (filePath, fileUUID) => {
             }
             console.log("alive")
             await new Promise(resolve => setTimeout(resolve, 3000))
-            renderer.render(viewer.scene, viewer.camera)
+            await renderer.render(viewer.scene, viewer.camera)
             global.window = global
             global.document = {
                 createElement: (nodeName) => {
@@ -233,8 +227,6 @@ const proceed_litematic = async (filePath, fileUUID) => {
                     })
                 )
             );
-            delete global.window
-            delete global.document
             console.log(`${regionName} GLTF saved successfully.`);
         }
     } catch (err) {

@@ -26,7 +26,8 @@
     "three-gltf-exporter":"0.0.1",
     "prismarine-nbt":"2.7.0",
     "prismarine-registry":"1.11.0",
-    "deepslate":"0.23.6"
+    "deepslate":"0.23.6",
+    "express-async-handler":"1.2.0"
   },
   "devDependencies": {},
   "engines": {
