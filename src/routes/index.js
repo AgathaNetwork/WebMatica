@@ -20,8 +20,29 @@ const World = require('prismarine-world')(version)
 const Chunk = require('prismarine-chunk')(version)
 const { Worker } = require('worker_threads');
 const center = new Vec3(30, 90, 30)
+// 读取文件获取lang.json
+var langData;
+var localeData;
 
-
+function translateItemIdToChinese(itemId) {
+    // 匹配 "minecraft:" 后的内容
+    const match = itemId.match(/^minecraft:(.+)$/i);
+    if (!match) return null;
+    
+    const itemName = match[1];
+    // 构造本地化键
+    const itemKey = `item.minecraft.${itemName}`;
+    const blockKey = `block.minecraft.${itemName}`;
+    var translation = null;
+    translation = localeData[itemKey];
+    if (translation == null) {
+        translation = localeData[blockKey];
+    }
+    if (translation == null) {
+        translation = itemName;
+    }
+    return translation;
+  }
 async function __stripNBTTyping(nbtData, deepslate) {
   if (nbtData.hasOwnProperty("type")) {
     switch(deepslate.NbtType[nbtData.type]) {
@@ -108,7 +129,8 @@ async function processSingleBlock(blockData, x, y, z, y_shift, z_shift, mask, nb
 
 const proceed_litematic = async (filePath, fileUUID) => {
     const deepslate = await import('deepslate');
-    
+    langData = await fs.readFile(path.join(__dirname, '../../config/lang.json'), 'utf-8');
+    localeData = JSON.parse(langData);
     try {
         // 读取 .litematic 文件
         const data = await fs.readFile(filePath);
@@ -117,6 +139,8 @@ const proceed_litematic = async (filePath, fileUUID) => {
         var viewer = null
         var worldView = null
         //for (let regionName in regions) { // 使用 for...of 循环
+        var material_sum = [];
+        var totalCount = 0;
         for(const [regionName, _] of Object.entries(regions)) {
 
             global.ImageData = ImageData;
@@ -172,9 +196,16 @@ const proceed_litematic = async (filePath, fileUUID) => {
                 var hasMaterial = false;
                 // minecraft:air跳过
                 if(blockName != "minecraft:air"){
+                    totalCount++;
                     for (let i = 0; i < material_list.length; i++) {
                         if (material_list[i].name === blockName) {
                             material_list[i].count++;
+                            for(let j = 0; j < material_sum.length; j++) {
+                                if (material_sum[j].name === blockName) {
+                                    material_sum[j].count++;
+                                    break;
+                                }
+                            }
                             hasMaterial = true;
                             break;
                         }
@@ -182,8 +213,24 @@ const proceed_litematic = async (filePath, fileUUID) => {
                     if (!hasMaterial) {
                         material_list.push({
                             name: blockName,
+                            locale: translateItemIdToChinese(blockName),
                             count: 1
                         });
+                        var hasList = 0;
+                        for(let j = 0; j < material_sum.length; j++) {
+                            if (material_sum[j].name === blockName) {
+                                material_sum[j].count++;
+                                hasList = 1;
+                                break;
+                            }
+                        }
+                        if (hasList == 0) {
+                            material_sum.push({
+                                name: blockName,
+                                locale: translateItemIdToChinese(blockName),
+                                count: 1
+                            });
+                        }
                     }
                 }
                 
@@ -263,6 +310,14 @@ const proceed_litematic = async (filePath, fileUUID) => {
             await save_metadata(fileUUID, regionName, metadata, material_list);
             await mark_doneflag(fileUUID, regionName);
         }
+        // 保存总材料列表
+        await fs.writeFile(
+            path.join(__dirname, '../../uploads/info', `${fileUUID}.json`),
+            JSON.stringify({
+                material_sum: material_sum,
+                totalCount: totalCount
+            }, null, 2)
+        );
     } catch (err) {
         console.error(`Error processing .litematic file: ${err.message}`);
         throw err;
@@ -369,8 +424,9 @@ router.post('/proceed', upload.single('file'), async (req, res) => {
     // 返回文件的完整路径
     const filePath = path.join(__dirname, '../../uploads/file', req.file.filename);
     const fileUUID = req.file.uuid; // 获取 UUID
-    res.send({status: 'success', uuid: fileUUID});
     await generate_doneflag(filePath, fileUUID);
+    
+    res.send({status: 'success', uuid: fileUUID});
     await proceed_litematic(filePath, fileUUID);
 });
 
@@ -380,7 +436,9 @@ router.get('/', (req, res) => {
 });
 router.get('/procpage', (req, res) => {
     res.render('procpage', {});
-    
+});
+router.get('/detail', (req, res) => {
+    res.render('detail', {});
 });
 
 module.exports = router;

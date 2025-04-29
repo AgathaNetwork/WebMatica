@@ -8,13 +8,13 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #e6f7ff; /* 浅蓝色背景 */
+            background-color: white; /* 浅蓝色背景 */
         }
         .navbar {
-            background-color: #007bff; /* 深蓝色导航栏 */
+            background-color: #e6f7ff; /* 深蓝色导航栏 */
         }
         .navbar-brand {
-            color: white !important;
+            color: black !important;
         }
         .container {
             margin-top: 50px;
@@ -70,6 +70,7 @@
                         文件上传成功，UUID：<strong>${uuid}</strong>，正在重定向至详情页面
                     </div>
                 `;
+                window.location.href = `/procpage?uuid=${uuid}`; // 重定向到详情页面
             } catch (error) {
                 document.getElementById('response').innerHTML = `
                     <div class="alert alert-danger">

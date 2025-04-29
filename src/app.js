@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const routes = require('./routes/index');
 const statusRoute = require('./routes/status');
+const regionRoute = require('./routes/region');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -13,10 +14,12 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'))); // 暴露 uploads 文件夹
 
 // Routes
 app.use('/', routes);
 app.use('/', statusRoute);
+app.use('/', regionRoute);
 
 // Start the server
 app.listen(PORT, () => {

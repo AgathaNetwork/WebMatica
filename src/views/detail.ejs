@@ -6,6 +6,7 @@
     <title>WebMatica</title>
     <!-- 引入 Bootstrap CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
             background-color: white; /* 浅蓝色背景 */
@@ -36,7 +37,7 @@
         }
     </style>
 </head>
-<body onload="AwaitStatus();">
+<body onload="App.AwaitStatus();">
     <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
@@ -45,22 +46,23 @@
     </nav>
 
     <!-- 主内容 -->
-    <div class="container">
-        <div class="loading-container">
-            <!-- 旋转加载标志 -->
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <!-- 状态文字 -->
-            <div class="status-text">正在处理</div>
-        </div>
-        <div class="status-container mt-4">
-            <small class="status-desc">状态加载中</small>
-        </div>
+    <div class="container" id="containerDiv">
+        
     </div>
 
     <!-- 引入 Bootstrap JS 和依赖 -->
     <script src="js/bootstrap.min.js"></script>
-    <script src="js/procpage.js"></script>
+    <!--  -->
+    <script type="importmap">
+        
+        {
+            "imports": {
+              "three": "/js/Three.js",
+              "three/controls/OrbitControls": "/js/OrbitControls.js",
+              "three/loaders/GLTFLoader": "/js/GLTFLoader.js"
+            }
+          }
+    </script>
+    <script type="module" src="js/detail.js"></script>
 </body>
 </html>
