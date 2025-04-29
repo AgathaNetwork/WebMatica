@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebMatica</title>
+    <!-- 引入 Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e6f7ff; /* 浅蓝色背景 */
+        }
+        .navbar {
+            background-color: #007bff; /* 深蓝色导航栏 */
+        }
+        .navbar-brand {
+            color: white !important;
+        }
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">WebMatica</a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <!-- 旋转加载标志 -->
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <!-- 状态文字 -->
+        <div class="status-text">正在处理</div>
+    </div>
+
+    <!-- 引入 Bootstrap JS 和依赖 -->
+    <script src="js/bootstrap.min.js"></script>
+    
+</body>
+</html>

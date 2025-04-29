@@ -3,14 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title>WebMatica</title>
+    <!-- 引入 Bootstrap CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e6f7ff; /* 浅蓝色背景 */
+        }
+        .navbar {
+            background-color: #007bff; /* 深蓝色导航栏 */
+        }
+        .navbar-brand {
+            color: white !important;
+        }
+        .container {
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
-    <h1><%= title %></h1>
-    <form action="/proceed" method="POST" enctype="multipart/form-data">
-        <label for="file">Choose a file to upload:</label>
-        <input type="file" id="file" name="file" required>
-        <button type="submit">Upload</button>
-    </form>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">WebMatica</a>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container">
+        <h1 class="text-center mb-4">上传 .litematic 文件</h1>
+        <form id="uploadForm" action="/proceed" method="POST" enctype="multipart/form-data" class="p-4 bg-white rounded shadow">
+            <div class="mb-3">
+                <input type="file" id="file" name="file" class="form-control" accept=".litematic" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">提交</button>
+        </form>
+        <div id="response" class="mt-4 text-center"></div>
+    </div>
+
+    <!-- 引入 Bootstrap JS 和依赖 -->
+    <script src="js/bootstrap.min.js"></script>
+    <script>
+        // 监听表单提交事件
+        document.getElementById('uploadForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // 阻止默认表单提交行为
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method,
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to upload file');
+                }
+
+                const result = await response.json();
+                const uuid = result.uuid; // 假设服务器返回的 JSON 包含 uuid 字段
+
+                // 显示返回的 UUID
+                document.getElementById('response').innerHTML = `
+                    <div class="alert alert-primary">
+                        文件上传成功，UUID：<strong>${uuid}</strong>，正在重定向至详情页面
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('response').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        });
+    </script>
 </body>
 </html>

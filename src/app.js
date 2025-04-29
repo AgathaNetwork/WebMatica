@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const routes = require('./routes/index');
-
+const statusRoute = require('./routes/status');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -16,6 +16,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
 app.use('/', routes);
+app.use('/', statusRoute);
 
 // Start the server
 app.listen(PORT, () => {
