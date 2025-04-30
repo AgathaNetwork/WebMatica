@@ -46,9 +46,31 @@
     </nav>
 
     <!-- 主内容 -->
-    <div class="container" id="containerDiv">
+    <!-- 选项卡导航 -->
+    <div class="container mt-2">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" data-bs-target="#tab1" type="button" role="tab" aria-controls="tab1" aria-selected="true">分选区</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" data-bs-target="#tab2" type="button" role="tab" aria-controls="tab2" aria-selected="false">按文件</button>
+            </li>
+        </ul>
+    
+        <!-- 选项卡内容 -->
+        <div class="tab-content mt-1" id="myTabContent">
+            <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+                <div class="container" id="containerDiv">
+                </div>
+            </div>
+            <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+                <div class="container" id="sumList">
+                </div>
+            </div>
+        </div>
         
-    </div>
+            
+        </div>
 
     <!-- 引入 Bootstrap JS 和依赖 -->
     <script src="js/bootstrap.min.js"></script>

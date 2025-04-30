@@ -36,6 +36,7 @@ const App = {
                     // <ul class="list-group
                         await App.showDiv(uuid, region.name); // 显示每个 region 的信息
                     });
+                    App.showSum(uuid); // 显示汇总信息
             }
         } catch (error) {
             console.error('请求失败:', error.message);
@@ -86,22 +87,24 @@ const App = {
         materialHTML += "</tbody></table>";
         // 创建一个新的 div 元素并设置其内容
         const DivElement = document.getElementById("containerDiv");
+
         var thisElement = document.createElement("div");
-        thisElement.className = "row";
-        thisElement.style.marginBottom = "1rem";
+        thisElement.className = "row shadow-sm";
+        thisElement.style.marginTop = "1rem";
+        thisElement.style.borderRadius = "10px";
         thisElement.id = "Div_" + name;
         thisElement.innerHTML = `
             <div class="col-md-6 col-12">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><div style="display: flex; align-items: center;">
-                        <h3 style="margin-right: 1rem;">${name}</h3>
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="App.downloadGLTF('${uuid}', '${name}');">下载glTF</button>
-                        </div></li>
-                    <li class="list-group-item"><a class="text-black-50" style="margin-right:1rem;text-decoration:none">大小</a><small>x=</small>${xSize}<small>,y=</small>${ySize}<small>,z=</small>${zSize}</li>
-                    <li class="list-group-item" style="overflow-y: auto;height:300px">
-                        ` + materialHTML + `
-                    </li>
-                </ul>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><div style="display: flex; align-items: center;">
+                <h3 style="margin-right: 1rem;">${name}</h3>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="App.downloadGLTF('${uuid}', '${name}');">下载glTF</button>
+                </div></li>
+                <li class="list-group-item"><a class="text-black-50" style="margin-right:1rem;text-decoration:none">大小</a><small>x=</small>${xSize}<small>,y=</small>${ySize}<small>,z=</small>${zSize}</li>
+                <li class="list-group-item" style="overflow-y: auto; max-height: 300px;">
+                ` + materialHTML + `
+                </li>
+            </ul>
             </div>
             <div class="col-md-6 col-12" style="align-items:center;justify-content:center;display: flex" id="modelDiv_${name}">
             </div>`;
@@ -117,6 +120,30 @@ const App = {
                 }
             )
         );
+    },
+    showSum: async function(uuid){
+        // 调用API获取当前选区数据
+        var data;
+        const endpoint = '/regionsum?uuid=' + uuid; // 使用 uuid 和 name 作为查询参数
+        try {
+            const response = await fetch(endpoint); // 发送 HTTP GET 请求
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            data = await response.json(); // 假设服务器返回 JSON 数据
+            console.log(data);
+            
+        } catch (error) {
+            console.error('请求失败:', error.message);
+        }
+        var materialList = data.data.material_sum;
+        var materialHTML = "<table class=\"table table-bordered\"><thead class=\"table-light\"><tr><th scope=\"col\">名称</th><th scope=\"col\">数量</th></tr></thead><tbody>";
+        materialList.forEach(material => {
+            materialHTML += `<tr><td>${material.locale}</td><td>${material.count}</td></tr>`;
+        })
+        materialHTML += "</tbody></table>";
+        document.getElementById("sumList").innerHTML = materialHTML;
+        
     },
     createGLTFViewer: async function (modelUrl, {
         width = 400,
