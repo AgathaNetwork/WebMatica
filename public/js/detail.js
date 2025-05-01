@@ -52,14 +52,8 @@ const App = {
         link.click();
         document.body.removeChild(link);
     },
-    downloadLitematic: function(uuid) {
-        // 下载 Litematic 文件
-        const link = document.createElement('a');
-        link.href = '/uploads/file/' + uuid + '.litematic';
-        link.download = uuid + '.litematic';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    downloadList: function(uuid, name) {
+        window.location.href = "/exportpage?uuid=" + uuid + "&name=" + name;
     },
     showDiv: async function(uuid, name){
         // 调用API获取当前选区数据
@@ -87,7 +81,6 @@ const App = {
         materialHTML += "</tbody></table>";
         // 创建一个新的 div 元素并设置其内容
         const DivElement = document.getElementById("containerDiv");
-
         var thisElement = document.createElement("div");
         thisElement.className = "row shadow-sm";
         thisElement.style.marginTop = "1rem";
@@ -99,6 +92,7 @@ const App = {
                 <li class="list-group-item"><div style="display: flex; align-items: center;">
                 <h3 style="margin-right: 1rem;">${name}</h3>
                 <button type="button" class="btn btn-outline-primary btn-sm" onclick="App.downloadGLTF('${uuid}', '${name}');">下载glTF</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" style="margin-left:1rem" onclick="App.downloadList('${uuid}', '${name}');">导出材料</button>
                 </div></li>
                 <li class="list-group-item"><a class="text-black-50" style="margin-right:1rem;text-decoration:none">大小</a><small>x=</small>${xSize}<small>,y=</small>${ySize}<small>,z=</small>${zSize}</li>
                 <li class="list-group-item" style="overflow-y: auto; max-height: 300px;">
@@ -144,6 +138,8 @@ const App = {
         materialHTML += "</tbody></table>";
         document.getElementById("sumList").innerHTML = materialHTML;
         
+        const WidgetDiv = document.getElementById("widgetDiv");
+        WidgetDiv.innerHTML = "<button type=\"button\" class=\"btn btn-outline-primary btn-sm\" onclick=\"App.downloadList('" + uuid + "', '');\">导出材料</button><small style=\"margin-left:1rem\">将所有选区数据求和得到以下数据，即整个文件的材料</small>";
     },
     createGLTFViewer: async function (modelUrl, {
         width = 400,

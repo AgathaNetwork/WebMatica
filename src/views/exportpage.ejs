@@ -72,7 +72,6 @@
                     <label for="fileFormat" class="form-label">文件格式</label>
                     <select class="form-select" id="fileFormat">
                         <option value="csv">CSV</option>
-                        <option value="pdf">PDF</option>
                         <option value="txt">TXT</option>
                     </select>
                 </div>
@@ -90,7 +89,8 @@
 
         <button class="btn btn-primary" onclick="serializeRules()">导出</button>
     </div>
-
+    <div class="container" id="RawListContainer" style="margin-top:1rem">
+    </div>
     <!-- 模态框：删除规则 -->
     <div class="modal fade" id="deleteRuleModal" tabindex="-1" aria-labelledby="deleteRuleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -345,7 +345,13 @@
 
                 const result = await response.json(); // 解析响应数据
                 console.log('Success:', result);
-                return result;
+                const urlDownload = '/uploads/export/' + result.file;
+                const link = document.createElement('a');
+                link.href = urlDownload;
+                link.download = result.file;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -355,7 +361,7 @@
         var uuid = "";
         var name = "";
         var type = "";
-        function ApplyContent() {
+        async function ApplyContent() {
             // 获取 URL 参数且判断有无
             const urlParams = new URLSearchParams(window.location.search);
             // 获取 uuid 参数
@@ -372,7 +378,48 @@
                 type = "region";
                 document.getElementById("titleP").innerHTML = "<h3>按选区导出</h3><small style='margin-left:2rem'>选区：" + name + "</small>";
             }
+            var apiURL = "";
+            var data = {};
+            if(type == "region")
+            {
+                apiURL = "/region?uuid=" + uuid + "&name=" + name;
+                await fetch(apiURL)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json(); // Parse the JSON response
+                    })
+                    .then(jsonResponse => {
+                        data = jsonResponse.data.material_list; // Access the 'data' key
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    });
 
+            }else {
+                apiURL = "/regionsum?uuid=" + uuid;
+                await fetch(apiURL)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json(); // Parse the JSON response
+                    })
+                    .then(jsonResponse => {
+                        data = jsonResponse.data.material_sum; // Access the 'data' key
+                    })
+                    .catch(error => {
+                        console.error('There has been a problem with your fetch operation:', error);
+                    });
+            }
+            console.log(data);
+            var materialHTML = "<table class=\"table table-bordered\"><thead class=\"table-light\"><tr><th scope=\"col\">名称</th><th scope=\"col\">数量</th></tr></thead><tbody>";
+            data.forEach(material => {
+                materialHTML += `<tr><td>${material.locale}</td><td>${material.count}</td></tr>`;
+            })
+            materialHTML += "</tbody></table>";
+            document.getElementById("RawListContainer").innerHTML += materialHTML;
         }
     </script>
 

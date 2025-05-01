@@ -213,9 +213,6 @@ router.post('/exportapi', async (req, res) => {
             file: fname + ".csv"
         });
     }
-    else if (req.body.exportOptions.fileFormat == "pdf"){
-
-    }
     else if (req.body.exportOptions.fileFormat == "txt"){ 
         const csvFilePath = path.join(__dirname, '../../uploads/export/', `${fname}.txt`);
         const ws = fs.createWriteStream(csvFilePath);
