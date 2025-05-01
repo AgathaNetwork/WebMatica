@@ -46,27 +46,278 @@
     </nav>
 
     <!-- 大标题 -->
-    <p id="titleP"></p>
+    <div class="container">
+        <p id="titleP"></p>
+    </div>
+    <div class="container mt-4">
+        <!-- 规则设置 -->
+        <div class="mb-4 shadow-sm rounded">
+            <div class="mb-3" style="margin-left:2rem">
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRuleModal">删除</button>
+                <button class="btn btn-outline-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#sortRuleModal">排序</button>
+                <button class="btn btn-outline-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#replaceRuleModal">替换</button>
+                <small style="margin-left:1rem;margin-bottom:3rem;">规则将按顺序执行，拖动可排序</small>
+            </div>
+            <ul id="rulesList" class="list-group sortable-list" style="margin-left:1rem;margin-right:1rem;margin-bottom:1rem;">
+                <!-- 规则项将动态添加到这里 -->
+            </ul>
+            <br>
+        </div>
+
+        <!-- 导出设置 -->
+        <div class="mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="fileFormat" class="form-label">文件格式</label>
+                    <select class="form-select" id="fileFormat">
+                        <option value="csv">CSV</option>
+                        <option value="pdf">PDF</option>
+                        <option value="txt">TXT</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="countFormat" class="form-label">计数格式</label>
+                    <select class="form-select" id="countFormat">
+                        <option value="item">个</option>
+                        <option value="group">折叠到组</option>
+                        <option value="box">折叠到盒</option>
+                        <option value="box_inbox">折叠到箱盒</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="serializeRules()">导出</button>
+    </div>
+
+    <!-- 模态框：删除规则 -->
+    <div class="modal fade" id="deleteRuleModal" tabindex="-1" aria-labelledby="deleteRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteRuleModalLabel">添加删除规则</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="deleteString" class="form-label">要删除的方块ID（每行一个），如：minecraft:stone</label>
+                        <textarea class="form-control" id="deleteString" rows="3" placeholder="输入多个字符串，每行一个"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="addDeleteRuleBtn">添加规则</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框：排序规则 -->
+    <div class="modal fade" id="sortRuleModal" tabindex="-1" aria-labelledby="sortRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sortRuleModalLabel">添加排序规则</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="sortMethod" class="form-label">选择排序方式</label>
+                        <select class="form-select" id="sortMethod">
+                            <option value="id_asc">按ID正序</option>
+                            <option value="id_desc">按ID倒序</option>
+                            <option value="pinyin_asc">按拼音正序</option>
+                            <option value="pinyin_desc">按拼音倒序</option>
+                            <option value="quantity_asc">按数量正序</option>
+                            <option value="quantity_desc">按数量倒序</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="addSortRuleBtn">添加规则</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框：替换规则 -->
+    <div class="modal fade" id="replaceRuleModal" tabindex="-1" aria-labelledby="replaceRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="replaceRuleModalLabel">添加替换规则</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="findString" class="form-label">查找方块ID，如：minecraft:stone</label>
+                        <input type="text" class="form-control" id="findString">
+                    </div>
+                    <div class="mb-3">
+                        <label for="replaceString" class="form-label">替换方块ID，如：minecraft:bedrock</label>
+                        <input type="text" class="form-control" id="replaceString">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="addReplaceRuleBtn">添加规则</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/sortable.js"></script>
     <script>
-        var uuid = null;
-        var name = null;
+        const rulesList = document.getElementById('rulesList');
+        new Sortable(rulesList, {
+            animation: 150,
+            ghostClass: 'blue-background-class'
+        });
+
+        function getSortLabel(value) {
+            const map = {
+                'id_asc': '按ID正序',
+                'id_desc': '按ID倒序',
+                'pinyin_asc': '按拼音正序',
+                'pinyin_desc': '按拼音倒序',
+                'quantity_asc': '按数量正序',
+                'quantity_desc': '按数量倒序'
+            };
+            return map[value] || '';
+        }
+
+        function createRuleElement(type, data) {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+            let text = '';
+            switch (type) {
+                case 'delete':
+                    text = `删除：${data.strings.join(', ')}`;
+                    break;
+                case 'sort':
+                    text = `排序：${getSortLabel(data.method)}`;
+                    break;
+                case 'replace':
+                    text = `替换：${data.find} → ${data.replace}`;
+                    break;
+            }
+
+            const span = document.createElement('span');
+            span.textContent = text;
+            li.appendChild(span);
+
+            li.dataset.type = type;
+            li.dataset.params = JSON.stringify(data);
+
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-danger btn-sm';
+            btn.textContent = '删除';
+            btn.addEventListener('click', function () {
+                li.remove();
+            });
+
+            li.appendChild(btn);
+            return li;
+        }
+
+        // 添加删除规则
+        document.getElementById('addDeleteRuleBtn').addEventListener('click', function () {
+            const val = document.getElementById('deleteString').value.trim();
+            const strings = val.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            if (strings.length === 0) return;
+            const ruleItem = createRuleElement('delete', { strings: strings });
+            rulesList.appendChild(ruleItem);
+            document.getElementById('deleteString').value = '';
+            bootstrap.Modal.getInstance(document.getElementById('deleteRuleModal')).hide();
+        });
+
+        // 添加排序规则
+        document.getElementById('addSortRuleBtn').addEventListener('click', function () {
+            const method = document.getElementById('sortMethod').value;
+            const label = document.querySelector(`#sortMethod option[value="${method}"]`).text;
+            const ruleItem = createRuleElement('sort', { method: method });
+            rulesList.appendChild(ruleItem);
+            bootstrap.Modal.getInstance(document.getElementById('sortRuleModal')).hide();
+        });
+
+        // 添加替换规则
+        document.getElementById('addReplaceRuleBtn').addEventListener('click', function () {
+            const find = document.getElementById('findString').value.trim();
+            const replace = document.getElementById('replaceString').value.trim();
+            if (!find) return;
+            const ruleItem = createRuleElement('replace', { find: find, replace: replace });
+            rulesList.appendChild(ruleItem);
+            document.getElementById('findString').value = '';
+            document.getElementById('replaceString').value = '';
+            bootstrap.Modal.getInstance(document.getElementById('replaceRuleModal')).hide();
+        });
+
+        // 序列化函数
+        async function serializeRules() {
+            const rules = [];
+            document.querySelectorAll('#rulesList li').forEach(li => {
+                const type = li.dataset.type;
+                let params = JSON.parse(li.dataset.params);
+                rules.push({ type: type, ...params });
+            });
+
+            const exportOptions = {
+                fileFormat: document.getElementById('fileFormat').value,
+                countFormat: document.getElementById('countFormat').value
+            };
+
+            const data = {
+                rules: rules,
+                exportOptions: exportOptions,
+                uuid: uuid,
+                type: type,
+                name: name
+            };
+
+            console.log(JSON.stringify(data, null, 2));
+            try {
+                const response = await fetch('/exportapi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data) // 将参数转换为 JSON 字符串
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json(); // 解析响应数据
+                console.log('Success:', result);
+                return result;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+    <script>
+        var uuid = "";
+        var name = "";
         var type = "";
         function ApplyContent() {
-            // 获取 URL 参数
+            // 获取 URL 参数且判断有无
             const urlParams = new URLSearchParams(window.location.search);
+            // 获取 uuid 参数
             uuid = urlParams.get('uuid');
-            // 判断有无参数 
-            if (!uuid) {
-                window.location.href = '/';
-            }
+            // 获取 name 参数
             name = urlParams.get('name');
-            if (!name) {
+            // 判断有无参数
+            if (!uuid || uuid === "" || name == "null") {
+                window.location.href = '/';
+            }else if (name === "") {
                 type = "whole";
                 document.getElementById("titleP").innerHTML = "<h3>按文件导出</h3>";
-            }
-            else {
+            }else {
                 type = "region";
-                document.getElementById("titleP").innerHTML = "<h3>按选区导出</h3><small style='margin-left:2rem'>" + name + "</small>";
+                document.getElementById("titleP").innerHTML = "<h3>按选区导出</h3><small style='margin-left:2rem'>选区：" + name + "</small>";
             }
 
         }

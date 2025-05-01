@@ -3,6 +3,7 @@ const path = require('path');
 const routes = require('./routes/index');
 const statusRoute = require('./routes/status');
 const regionRoute = require('./routes/region');
+const exportRoute = require('./routes/export');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -20,6 +21,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'))); // ๆด้
 app.use('/', routes);
 app.use('/', statusRoute);
 app.use('/', regionRoute);
+app.use('/', exportRoute);
 
 // Start the server
 app.listen(PORT, () => {

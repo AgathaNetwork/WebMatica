@@ -440,5 +440,8 @@ router.get('/procpage', (req, res) => {
 router.get('/detail', (req, res) => {
     res.render('detail', {});
 });
+router.get('/exportpage', (req, res) => {
+    res.render('exportpage', {});
+});
 
 module.exports = router;
