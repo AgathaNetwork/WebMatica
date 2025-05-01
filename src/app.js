@@ -5,7 +5,9 @@ const statusRoute = require('./routes/status');
 const regionRoute = require('./routes/region');
 const exportApiRoute = require('./routes/exportapi');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const fs = require('fs');
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../config', 'cfg.json'), 'utf8'));
+const PORT = config.port;
 
 // Set view engine
 app.set('view engine', 'ejs');
