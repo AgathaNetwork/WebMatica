@@ -56,6 +56,7 @@
                 <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRuleModal">删除</button>
                 <button class="btn btn-outline-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#sortRuleModal">排序</button>
                 <button class="btn btn-outline-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#replaceRuleModal">替换</button>
+                <button class="btn btn-outline-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#filterRuleModal">筛选</button>
                 <small style="margin-left:1rem;margin-bottom:3rem;">规则将按顺序执行，拖动可排序</small>
             </div>
             <ul id="rulesList" class="list-group sortable-list" style="margin-left:1rem;margin-right:1rem;margin-bottom:1rem;">
@@ -167,6 +168,34 @@
         </div>
     </div>
 
+    <!-- 模态框：筛选规则 -->
+    <div class="modal fade" id="filterRuleModal" tabindex="-1" aria-labelledby="filterRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filterRuleModalLabel">添加筛选规则</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="filterType" class="form-label">筛选方式</label>
+                        <select class="form-select" id="filterType">
+                            <option value="lt">丢弃小于</option>
+                            <option value="gt">丢弃大于</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="filterValue" class="form-label">阈值</label>
+                        <input type="number" class="form-control" id="filterValue" placeholder="输入数字">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary" id="addFilterRuleBtn">添加规则</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="js/sortable.js"></script>
     <script>
         const rulesList = document.getElementById('rulesList');
@@ -201,6 +230,11 @@
                     break;
                 case 'replace':
                     text = `替换：${data.find} → ${data.replace}`;
+                    break;
+                case 'filter':
+                    text = `筛选：${
+                        data.type === 'lt' ? '丢弃小于' : '丢弃大于'
+                    } ${data.value}`;
                     break;
             }
 
@@ -253,7 +287,26 @@
             document.getElementById('replaceString').value = '';
             bootstrap.Modal.getInstance(document.getElementById('replaceRuleModal')).hide();
         });
+        // 添加筛选规则
+        document.getElementById('addFilterRuleBtn').addEventListener('click', function () {
+            const type = document.getElementById('filterType').value;
+            const value = parseFloat(document.getElementById('filterValue').value.trim());
 
+            // 验证输入是否为有效数字
+            if (isNaN(value)) return;
+
+            const ruleItem = createRuleElement('filter', {
+                type: type,
+                value: value
+            });
+
+            rulesList.appendChild(ruleItem);
+            bootstrap.Modal.getInstance(document.getElementById('filterRuleModal')).hide();
+
+            // 清空表单
+            document.getElementById('filterType').value = 'lt';
+            document.getElementById('filterValue').value = '';
+        });
         // 序列化函数
         async function serializeRules() {
             const rules = [];
