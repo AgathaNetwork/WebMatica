@@ -43,9 +43,33 @@
 ### 前端（EJS + Bootstrap + JavaScript）
 - **页面结构**：
   - `index.ejs`：上传页面。
+<div style="text-align: center;">
+    <img src="img/index.png" alt="" width="500" />
+</div>
+  
+
   - `procpage.ejs`：处理中状态页。
+
+<div style="text-align: center;">
+  <img src="img/proceed.png" alt="" width="500" />
+</div>
+
   - `detail.ejs`：详情查看页（含 3D 预览）。
+  
+<div style="text-align: center;">
+  <img src="img/detail.png" alt="" width="500" />
+</div>
+
+<div style="text-align: center;">
+  <img src="img/detail_file.png" alt="" width="500" />
+</div>
+
   - `exportpage.ejs`：导出配置与预览页。
+  
+<div style="text-align: center;">
+  <img src="img/export.png" alt="" width="500" />
+</div>
+
 - **交互逻辑**：
   - 异步加载数据并渲染选区。
   - 拖拽排序规则。
@@ -71,6 +95,7 @@
 │   ├── detail.ejs
 │   ├── exportpage.ejs
 │   ├── index.ejs
+│   ├── license.ejs
 │   └── procpage.ejs
 └── app.js
 ```
