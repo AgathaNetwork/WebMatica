@@ -8,6 +8,58 @@ const app = express();
 const fs = require('fs');
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../config', 'cfg.json'), 'utf8'));
 const PORT = config.port;
+const AutoDelete = config.autodelete;
+
+
+function deleteOldFiles() {
+    console.log('Scanning uploads directory for old files...');
+
+    function walk(dir) {
+        let files;
+        try {
+            files = fs.readdirSync(dir);
+        } catch (err) {
+            console.error(`Failed to read directory ${dir}:`, err.message);
+            return;
+        }
+
+        for (const file of files) {
+            const fullPath = path.join(dir, file);
+            let stats;
+            try {
+                stats = fs.statSync(fullPath);
+            } catch (err) {
+                console.error(`Failed to stat ${fullPath}:`, err.message);
+                continue;
+            }
+
+            if (stats.isFile()) {
+                const now = Date.now();
+                const lastModified = stats.mtimeMs;
+                if (now - lastModified > AutoDelete * 1000) {
+                    fs.unlink(fullPath, (err) => {
+                        if (err) {
+                            console.error(`Failed to delete file ${fullPath}:`, err.message);
+                        } else {
+                            console.log(`Deleted old file: ${fullPath}`);
+                        }
+                    });
+                }
+            } else if (stats.isDirectory()) {
+                walk(fullPath); // 递归进入子目录
+            }
+        }
+    }
+
+    walk(path.join(__dirname, '../uploads'));
+}
+
+// 启动定时任务，每 10 秒运行一次
+setInterval(deleteOldFiles, 10000);
+
+// 初始运行一次
+if(AutoDelete != -1) deleteOldFiles();
+
 
 // Set view engine
 app.set('view engine', 'ejs');

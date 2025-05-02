@@ -20,7 +20,6 @@
     "uuid": "^9.0.0",
     "node-canvas-webgl": "0.3.0",
     "prismarine-schematic":"1.2.3",
-    "mcnbt":"2.0.3",
     "three-stlexporter":"1.0.0",
     "vblob":"1.1.0",
     "three-gltf-exporter":"0.0.1",
