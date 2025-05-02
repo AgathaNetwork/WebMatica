@@ -117,6 +117,11 @@
 - `port`: Sets the port number for server listening.
 - `autodelete`: Threshold time (in seconds) for automatically deleting old files in the upload directory. Setting it to `-1` disables automatic deletion.
 
+
+### `config/lang.json`
+
+Localized language file for this version
+
 ---
 
 ## 🚀 Quick Start
