@@ -1,5 +1,7 @@
 # WebMatica
 
+简体中文 | [English](README_en.md)
+
 `WebMatica` 是一个基于 Web 的 Litematica 文件查看与处理工具，支持用户上传 `.litematic` 文件，并进行结构解析、区域数据统计、导出等操作。适用于 Minecraft 建筑爱好者和模组开发者。
 
 ---
