@@ -443,5 +443,8 @@ router.get('/detail', (req, res) => {
 router.get('/exportpage', (req, res) => {
     res.render('exportpage', {});
 });
+router.get('/license', (req, res) => {
+    res.render('license', {});
+});
 
 module.exports = router;

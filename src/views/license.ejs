@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebMatica</title>
+  <!-- 引入 Bootstrap CSS -->
+  <link href="/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: white;
+    }
+    .navbar {
+      background-color: #e6f7ff;
+    }
+    .navbar-brand {
+      color: black !important;
+    }
+    .license-section {
+      margin-top: 30px;
+    }
+    .license-card {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">WebMatica</a>
+  </div>
+</nav>
+
+<!-- 主体内容 -->
+<div class="container license-section">
+  <h2 class="mb-4">开源软件许可证</h2>
+
+  <p>本项目使用了以下开源软件包，遵循其相应的开源许可证。</p>
+
+  <div class="accordion" id="licenseAccordion">
+
+    <!-- Express.js -->
+    <div class="accordion-item license-card">
+      <h2 class="accordion-header" id="headingExpress">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExpress" aria-expanded="true" aria-controls="collapseExpress">
+          Express.js
+        </button>
+      </h2>
+      <div id="collapseExpress" class="accordion-collapse collapse show" data-bs-parent="#licenseAccordion">
+        <div class="accordion-body">
+          <strong>许可证：</strong> MIT License<br><br>
+          <pre>
+            (The MIT License)
+
+            Copyright (c) 2009-2014 TJ Holowaychuk <tj@vision-media.ca>
+            Copyright (c) 2013-2014 Roman Shtylman <shtylman+expressjs@gmail.com>
+            Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
+            
+            Permission is hereby granted, free of charge, to any person obtaining
+            a copy of this software and associated documentation files (the
+            'Software'), to deal in the Software without restriction, including
+            without limitation the rights to use, copy, modify, merge, publish,
+            distribute, sublicense, and/or sell copies of the Software, and to
+            permit persons to whom the Software is furnished to do so, subject to
+            the following conditions:
+            
+            The above copyright notice and this permission notice shall be
+            included in all copies or substantial portions of the Software.
+            
+            THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+            EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+            IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+            CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+            TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+            SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Three.js -->
+    <div class="accordion-item license-card">
+      <h2 class="accordion-header" id="headingThree">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          Three.js
+        </button>
+      </h2>
+      <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#licenseAccordion">
+        <div class="accordion-body">
+          <strong>许可证：</strong> MIT License<br><br>
+          <pre>
+            The MIT License
+
+            Copyright © 2010-2025 three.js authors
+            
+            Permission is hereby granted, free of charge, to any person obtaining a copy
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:
+            
+            The above copyright notice and this permission notice shall be included in
+            all copies or substantial portions of the Software.
+            
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+            THE SOFTWARE.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minecraft-data -->
+    <div class="accordion-item license-card">
+      <h2 class="accordion-header" id="headingMinecraftData">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMinecraftData" aria-expanded="false" aria-controls="collapseMinecraftData">
+          minecraft-data
+        </button>
+      </h2>
+      <div id="collapseMinecraftData" class="accordion-collapse collapse" data-bs-parent="#licenseAccordion">
+        <div class="accordion-body">
+          <strong>许可证：</strong> MIT License<br><br>
+          <pre>
+Copyright (c) 2013-2023 PrismarineJS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deepslate -->
+    <div class="accordion-item license-card">
+      <h2 class="accordion-header" id="headingDeepslate">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDeepslate" aria-expanded="false" aria-controls="collapseDeepslate">
+          deepslate
+        </button>
+      </h2>
+      <div id="collapseDeepslate" class="accordion-collapse collapse" data-bs-parent="#licenseAccordion">
+        <div class="accordion-body">
+          <strong>许可证：</strong> MIT License<br><br>
+          <pre>
+            MIT License
+
+            Copyright (c) 2021 Misode
+            
+            Permission is hereby granted, free of charge, to any person obtaining a copy
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:
+            
+            The above copyright notice and this permission notice shall be included in all
+            copies or substantial portions of the Software.
+            
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+            SOFTWARE.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prismarine-viewer -->
+    <div class="accordion-item license-card">
+      <h2 class="accordion-header" id="headingPrismarineViewer">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePrismarineViewer" aria-expanded="false" aria-controls="collapsePrismarineViewer">
+          prismarine-viewer
+        </button>
+      </h2>
+      <div id="collapsePrismarineViewer" class="accordion-collapse collapse" data-bs-parent="#licenseAccordion">
+        <div class="accordion-body">
+          <strong>许可证：</strong> MIT License<br><br>
+          <pre>
+            MIT License
+
+            Copyright (c) 2020 PrismarineJS
+            
+            Permission is hereby granted, free of charge, to any person obtaining a copy
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:
+            
+            The above copyright notice and this permission notice shall be included in all
+            copies or substantial portions of the Software.
+            
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+            SOFTWARE.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fast-csv -->
+    <div class="accordion-item license-card">
+      <h2 class="accordion-header" id="headingFastCsv">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFastCsv" aria-expanded="false" aria-controls="collapseFastCsv">
+          fast-csv
+        </button>
+      </h2>
+      <div id="collapseFastCsv" class="accordion-collapse collapse" data-bs-parent="#licenseAccordion">
+        <div class="accordion-body">
+          <strong>许可证：</strong> MIT License<br><br>
+          <pre>
+            The MIT License
+
+            Copyright (c) 2011-2025 C2FO
+            
+            Permission is hereby granted, free of charge, to any person obtaining a copy
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:
+            
+            The above copyright notice and this permission notice shall be included in
+            all copies or substantial portions of the Software.
+            
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+            THE SOFTWARE.
+          </pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 引入 Bootstrap JS 和依赖 -->
+<script src="/js/bootstrap.min.js"></script>
+
+</body>
+</html>

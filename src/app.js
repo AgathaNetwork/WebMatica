@@ -12,8 +12,6 @@ const AutoDelete = config.autodelete;
 
 
 function deleteOldFiles() {
-    console.log('Scanning uploads directory for old files...');
-
     function walk(dir) {
         let files;
         try {
