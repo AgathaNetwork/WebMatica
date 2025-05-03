@@ -1,16 +1,18 @@
 const viewDistance = 16
-const version = '1.21.4'
+const fs = require('fs').promises;
+const fs_sync = require('fs');
+const path = require('path');
+const config = JSON.parse(fs_sync.readFileSync(path.join(__dirname, '../../config', 'cfg.json'), 'utf8'));
+const version = config.version;
 const THREE = require('three')
 const { createCanvas, ImageData } = require('node-canvas-webgl/lib')
 
 
 const { Blob, FileReader } = require('vblob')
 
-const fs = require('fs').promises
 const Vec3 = require('vec3').Vec3
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
 const { v4: uuidv4 } = require('uuid'); // 引入 UUID 生成器
 const router = express.Router();
 const { Viewer, WorldView } = require('prismarine-viewer').viewer

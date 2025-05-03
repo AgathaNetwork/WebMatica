@@ -3,7 +3,8 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const csv = require('fast-csv');
-const version = "1.21.4";
+const config = JSON.parse(fs.readFileSync(path.join(__dirname, '../../config', 'cfg.json'), 'utf8'));
+const version = config.version;
 const mcData = require('minecraft-data')(version);
 
 // 监听 /exportapi 的 POST 请求
