@@ -5,14 +5,14 @@ import { GLTFLoader } from 'three/loaders/GLTFLoader';
 const App = {
 
 
-    AwaitStatus: function() {
+    AwaitStatus: async function() {
         // 获取当前 URL 的查询参数
         const urlParams = new URLSearchParams(window.location.search);
         const uuid = urlParams.get('uuid'); // 获取 uuid 参数
 
         if (uuid) {
             console.log(`UUID: ${uuid}`);
-            App.fetchStatus(uuid); // 调用 fetchStatus 函数
+            await App.fetchStatus(uuid); // 调用 fetchStatus 函数
         } else {
             console.error('UUID 参数未找到');
             window.location.href = '/'; // 重定向到主页
@@ -109,8 +109,8 @@ const App = {
                 {
                     width: 300,
                     height: 300,
-                    onLoad: () => console.log('Model 2 loaded'),
-                    onError: (e) => console.error('Model 2 failed:', e)
+                    onLoad: () => console.log('Model loaded'),
+                    onError: (e) => console.error('Model failed:', e)
                 }
             )
         );
@@ -131,9 +131,9 @@ const App = {
             console.error('请求失败:', error.message);
         }
         var materialList = data.data.material_sum;
-        var materialHTML = "<table class=\"table table-bordered\"><thead class=\"table-light\"><tr><th scope=\"col\">名称</th><th scope=\"col\">数量</th></tr></thead><tbody>";
+        var materialHTML = "<table class=\"table table-bordered\"><thead class=\"table-light\"><tr><th scope=\"col\">名称</th><th scope=\"col\">方块ID</th><th scope=\"col\">数量</th></tr></thead><tbody>";
         materialList.forEach(material => {
-            materialHTML += `<tr><td>${material.locale}</td><td>${material.count}</td></tr>`;
+            materialHTML += `<tr><td>${material.locale}</td><td>${material.name}</td><td>${material.count}</td></tr>`;
         })
         materialHTML += "</tbody></table>";
         document.getElementById("sumList").innerHTML = materialHTML;
@@ -153,7 +153,7 @@ const App = {
 
         // 创建透视相机
         const camera = new THREE.PerspectiveCamera(
-            45, width / height, 0.25, 100
+            45, width / height, 0.25, 10000
         );
 
         camera.position.set(0, 0, 5);
@@ -211,7 +211,7 @@ const App = {
                     center.y + maxSize * 1.2, // 更高的视角
                     center.z + cameraDist
                 );
-
+                camera.lookAt(center);
                 onLoad();
             },
             undefined,
