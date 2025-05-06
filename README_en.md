@@ -2,80 +2,76 @@
 
 [简体中文](README.md) | English
 
-`WebMatica` is a web-based Litematica file viewing and processing tool that supports user uploads of `.litematic` files and performs structure parsing, area data statistics, exporting, and other operations. It is suitable for Minecraft architecture enthusiasts and mod developers.
+`WebMatica` is a web-based Litematica file viewer and processing tool that supports uploading `.litematic` files, structural parsing, region data statistics, and export operations. Designed for Minecraft builders and mod developers.
 
 ---
 
 ## 📌 Features
 
-- **File Upload**: Supports uploading Minecraft building files in `.litematic` format.
-- **3D Preview**: Renders architectural structures using `Three.js`, providing basic 3D viewing functionality.
+- **File Upload**: Supports Minecraft building files in `.litematic` format.
+- **3D Preview**: Renders building structures using `Three.js` with basic 3D viewing capabilities.
 - **Data Statistics**:
-  - Generates material lists by selected region.
-  - Provides an overall material overview for the entire file.
+  - Material list by selected region(s).
+  - Overall material overview for entire files.
 - **Data Export**:
-  - Supports exporting in CSV / TXT formats.
-  - Supports various rules (sorting, filtering, replacing, deleting) to preprocess data.
-- **Automatic Cleanup of Expired Files**:
-  - Configurable automatic deletion of uploaded and exported files older than a specified time.
-  - Set the `autodelete` field in `cfg.json` (unit: seconds). For example, `3600` means one hour.
+  - Export to CSV/TXT formats.
+  - Preprocessing with sorting, filtering, replacement, and deletion rules.
+- **Automatic Cleanup**:
+  - Configurable deletion of expired files older than specified time.
+  - Set `autodelete` field in `cfg.json` (unit: seconds). Example: `3600` for 1 hour.
 
 ---
 
 ## 🧩 Technical Architecture
 
 ### Backend (Node.js + Express)
-- **Routing Management**:
-  - `/proceed`: Receives `.litematic` files and initiates the processing workflow.
-  - `/status`: Queries the processing status.
-  - `/region` & `/regionsum`: Retrieves material data for specific regions or the whole file.
-  - `/exportapi`: Exports statistical data based on rules.
+- **Routing**:
+  - `/proceed`: Receive `.litematic` files and start processing.
+  - `/status`: Query processing status.
+  - `/region` & `/regionsum`: Get material data for specific regions or total.
+  - `/exportapi`: Export statistics with custom rules.
 - **Core Modules**:
-  - Uses `deepslate` to parse `.litematic` files.
-  - Uses `prismarine-viewer` to render 3D scenes.
-  - Data processing logic includes asynchronous reading/writing, conversion, filtering, sorting, etc.
+  - Parse `.litematic` using `deepslate`.
+  - Render 3D scenes with `prismarine-viewer`.
+  - Data processing with async read/write, transformation, filtering, and sorting.
 - **Persistence**:
-  - Original files are stored in `/uploads/file/`.
-  - Intermediate results are stored in `/uploads/info/` and `/uploads/gltf/`.
-  - Exported files are stored in `/uploads/export/`.
-- **Automatic Cleanup Mechanism**:
-  - The application scans the `uploads` directory every 10 seconds.
-  - If configured, deletes files whose modification time exceeds the `AutoDelete` configuration value.
+  - Original files in `/uploads/file/`
+  - Intermediate results in `/uploads/info/` and `/uploads/gltf/`
+  - Exports stored in `/uploads/export/`
+- **Cleanup Mechanism**:
+  - Scans `uploads` directory every 10 seconds.
+  - Deletes files older than `AutoDelete` threshold if configured.
 
 ### Frontend (EJS + Bootstrap + JavaScript)
-- **Page Structure**:
-  - `index.ejs`: Upload page.
+- **Pages**:
+  - `index.ejs`: Upload interface.
   <div style="text-align: center;">
     <img src="img/index.png" alt="" width="500" />
   </div>
 
-  - `procpage.ejs`: Processing state page.
-
+  - `procpage.ejs`: Processing status page.
   <div style="text-align: center;">
     <img src="img/proceed.png" alt="" width="500" />
   </div>
 
-  - `detail.ejs`: Details viewing page (including 3D preview).
-
+  - `detail.ejs`: Detail view (with 3D preview).
   <div style="text-align: center;">
     <img src="img/detail.png" alt="" width="500" />
   </div>
-
   <div style="text-align: center;">
     <img src="img/detail_file.png" alt="" width="500" />
   </div>
 
-  - `exportpage.ejs`: Export configuration and preview page.
-
+  - `exportpage.ejs`: Export configuration and preview.
   <div style="text-align: center;">
     <img src="img/export.png" alt="" width="500" />
   </div>
 
-- **Interaction Logic**:
-  - Asynchronously loads and renders regions.
+- **Interactivity**:
+  - Async loading and rendering of regions.
   - Drag-and-drop rule sorting.
-  - Modal dialogs for adding different types of processing rules.
-  - Downloads exported results.
+  - Modal dialogs for adding processing rules.
+  - Download export results.
 
 ---
 
@@ -103,40 +99,35 @@
 
 ---
 
-## ⚙️ Configuration Instructions
+## ⚙️ Configuration
 
 ### `config/cfg.json`
 
 ```json
 {
   "port": 3000,
-  "autodelete": 3600
+  "autodelete": 3600,
+  "version": "1.21.4"
 }
 ```
 
-- `port`: Sets the port number for server listening.
-- `autodelete`: Threshold time (in seconds) for automatically deleting old files in the upload directory. Setting it to `-1` disables automatic deletion.
-
+- `port`: Server listening port number.
+- `autodelete`: Auto-delete threshold for old files in uploads directory (seconds). Set to `-1` to disable.
+- `version`: Game version for parsing files (must be supported by PrismarineJS).
 
 ### `config/lang.json`
 
-Localized language file for this version
+Language file for client-side localization, extractable from client JAR files.
 
 ---
 
 ## 🚀 Quick Start
 
-After cloning the project, execute the following commands in the project root directory to install dependencies and start the server:
-
-```bash
-npm install
-npm start
-```
-
-Visit `http://localhost:3000` to use the application.
+- [Windows](doc/installation_win_en.md)
+- [Linux](doc/installation_linux_en.md)
 
 ---
 
 ## 📝 License
 
-The project allows you to freely use, copy, and modify the software, but you must retain the original author's attribution and may not sell the software.
+This project allows free use, copying, and modification, but must retain original author attribution and cannot be sold.

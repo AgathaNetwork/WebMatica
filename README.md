@@ -111,29 +111,25 @@
 ```json
 {
   "port": 3000,
-  "autodelete": 3600
+  "autodelete": 3600,
+  "version": "1.21.4"
 }
 ```
 
 - `port`: 设置服务器监听的端口号。
 - `autodelete`: 自动删除上传目录下旧文件的时间阈值（单位：秒）。设为 `-1` 表示禁用自动删除。
+- `version`: 设置游戏版本，用于解析 `.litematic` 文件，需确保设置为PrismarineJS支持的版本号。
 
 ### `config/lang.json`
 
-对应版本的语言文件
+对应版本的语言文件，可以在客户端Jar文件中提取。
 
 ---
 
 ## 🚀 快速开始
 
-Clone 项目后，在项目根目录下执行以下命令安装依赖并启动服务器：
-
-```bash
-npm install
-npm start
-```
-
-访问 `http://localhost:3000` 即可使用。
+- [Windows系统](doc/installation_win.md)
+- [Linux系统](doc/installation_linux.md)
 
 ---
 
