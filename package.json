@@ -29,10 +29,11 @@
     "express-async-handler":"1.2.0",
     "prismarine-item":"1.16.0",
     "minecraft-data":"3.85.0",
-    "fast-csv":"5.0.2"
+    "fast-csv":"5.0.2",
+    "electron": "28.0.0"
   },
   "devDependencies": {},
   "engines": {
-    "node": ">=14.0.0"
+    "node": "18.18.0"
   }
 }
